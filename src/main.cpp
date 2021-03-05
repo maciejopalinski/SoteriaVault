@@ -66,6 +66,13 @@ void load()
     }
 }
 
+int exit(CDKSCREEN* screen)
+{
+    destroyCDKScreen(screen);
+    endCDK();
+    return 0;
+}
+
 int main()
 {
     // setup();
@@ -77,19 +84,19 @@ int main()
     
     CDKSCREEN* screen = initCDKScreen(window.window);
 
+    WelcomeView welcome = WelcomeView();
+
+    if(!welcome.activate(screen)) return exit(screen);
+
     LoginView login = LoginView();
     
-    if(!login.activate(screen))
-    {
-        destroyCDKScreen(screen);
-        endCDK();
-        return 0;
-    }
-
+    if(!login.activate(screen)) return exit(screen);
+    
+    
     destroyCDKScreen(screen);
     endCDK();
-
-    printf("\n\ndata: %i\n\n", (int) login.profile.getDataSize());
-
+    
+    printf("\ndata_size: %i\n", (int) login.profile.getDataSize());
+    
     return 0;
 }
