@@ -23,7 +23,7 @@ void setup()
 
     profile.setup(password);
 
-    ifstream t("lorem_ipsum.txt");
+    ifstream t("profiles/lorem_ipsum.txt");
     stringstream buffer;
     buffer << t.rdbuf();
 
