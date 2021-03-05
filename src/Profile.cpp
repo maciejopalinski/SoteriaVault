@@ -10,6 +10,10 @@ bool Profile::loadFromFile()
     
     if((file = fopen(filename.c_str(), "rb")))
     {
+        string header(16, '\0');
+        fread(&header[0], 1, 16, file);
+        if(header != "Soteria-Vault  ") return false;
+        
         fseek(file, 16*3, SEEK_SET);
 
         fread(encrypted_key1, 1, sizeof(encrypted_key1), file);

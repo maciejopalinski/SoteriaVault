@@ -164,7 +164,7 @@ bool LoginView::login()
     string password(this->password);
 
     profile.setFilename(filename);
-    profile.loadFromFile();
+    if(!profile.loadFromFile()) return false;
 
     if (profile.authenticate(password))
     {
