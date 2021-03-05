@@ -10,9 +10,9 @@ bool Profile::loadFromFile()
     
     if((file = fopen(filename.c_str(), "rb")))
     {
-        string header(16, '\0');
-        fread(&header[0], 1, 16, file);
-        if(header != "Soteria-Vault  ") return false;
+        char* header[16];
+        fread(header, 1, 16, file);
+        if(memcmp(header, "Soteria-Vault  ", 16)) return false;
         
         fseek(file, 16*3, SEEK_SET);
 
