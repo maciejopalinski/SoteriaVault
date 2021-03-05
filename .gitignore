@@ -3,5 +3,9 @@ bin
 obj
 *.o
 
+# soteria-vault user files
+profiles/*
+!profiles/.gitkeep
+
 # vscode
 *.code-workspace
