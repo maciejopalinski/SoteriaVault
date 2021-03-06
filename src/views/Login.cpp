@@ -117,27 +117,6 @@ bool LoginView::prompt_password(CDKSCREEN *screen)
     return button_box->currentButton == 0;
 }
 
-bool LoginView::activate_content(CDKSCREEN *screen)
-{
-    CDKMENTRY *content_entry = newCDKMentry(
-        screen,
-        CENTER, CENTER,
-        "<C>Content", 0,
-        A_NORMAL, '_', vMIXED,
-        0, 0, 100000, 0,
-        true, false
-    );
-
-    setCDKMentryValue(content_entry, (CDK_CSTRING) profile.getData());
-    
-    activateCDKMentry(content_entry, 0);
-    string data = strdup(content_entry->info);
-    profile.setData(data);
-    
-    destroyCDKMentry(content_entry);    
-    return true;
-}
-
 bool LoginView::activate(CDKSCREEN *screen)
 {
     filename:
@@ -147,11 +126,6 @@ bool LoginView::activate(CDKSCREEN *screen)
     if(!prompt_password(screen)) goto filename;
 
     if(!login()) goto password;
-
-    if(!activate_content(screen)) return false;
-
-    profile.encryptData();
-    profile.saveToFile();
 
     return true;
 }

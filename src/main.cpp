@@ -4,10 +4,13 @@
 using namespace std;
 
 #include "Profile.h"
+
 #include "display/Terminal.h"
 #include "display/Window.h"
+
 #include "views/Welcome.h"
 #include "views/Login.h"
+#include "views/Profile.h"
 
 void setup()
 {
@@ -81,18 +84,20 @@ int main()
 
     Terminal terminal = Terminal();
     Window window = Window(LINES, COLS, 0, 0);
-    
     CDKSCREEN* screen = initCDKScreen(window.window);
 
-    WelcomeView welcome = WelcomeView();
 
+    WelcomeView welcome = WelcomeView();
     if(!welcome.activate(screen)) return exit(screen);
 
     LoginView login = LoginView();
-    
     if(!login.activate(screen)) return exit(screen);
     
+    ProfileView prof_view = ProfileView(login.profile);
+    if(!prof_view.activate(screen)) return exit(screen);
     
+    
+    // EXIT
     destroyCDKScreen(screen);
     endCDK();
     
