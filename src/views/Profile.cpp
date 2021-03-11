@@ -22,6 +22,6 @@ bool ProfileView::activate(CDKSCREEN *screen)
     string data = strdup(content_entry->info);
     profile.setData(data);
     
-    destroyCDKMentry(content_entry);    
+    destroyCDKMentry(content_entry);
     return true;
 }

@@ -6,10 +6,9 @@
 
 class ProfileView
 {
-    private:
+    public:
         Profile profile;
 
-    public:
         ProfileView(Profile profile);
         
         bool activate(CDKSCREEN *screen);

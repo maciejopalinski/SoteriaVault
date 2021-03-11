@@ -95,11 +95,11 @@ int main()
     
     ProfileView prof_view = ProfileView(login.profile);
     if(!prof_view.activate(screen)) return exit(screen);
+
+    prof_view.profile.encryptData();
+    prof_view.profile.saveToFile();
     
-    
-    // EXIT
-    destroyCDKScreen(screen);
-    endCDK();
+    exit(screen);
     
     printf("\ndata_size: %i\n", (int) login.profile.getDataSize());
     
