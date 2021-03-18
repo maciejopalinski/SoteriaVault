@@ -4,14 +4,14 @@
 #include "BaseView.h"
 #include "../Profile.h"
 
-class ProfileView
+class ProfileView : BaseView
 {
     public:
         Profile profile;
 
-        ProfileView(Profile profile);
+        ProfileView(CDKSCREEN *screen, Profile profile);
         
-        bool activate(CDKSCREEN *screen);
+        bool activate();
 };
 
 #endif

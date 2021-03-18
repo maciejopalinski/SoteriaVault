@@ -1,11 +1,11 @@
 #include "Profile.h"
 
-ProfileView::ProfileView(Profile profile)
+ProfileView::ProfileView(CDKSCREEN *screen, Profile profile) : BaseView(screen)
 {
     this->profile = profile;
 }
 
-bool ProfileView::activate(CDKSCREEN *screen)
+bool ProfileView::activate()
 {
     CDKMENTRY *content_entry = newCDKMentry(
         screen,

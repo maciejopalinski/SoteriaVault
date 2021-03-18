@@ -1,6 +1,8 @@
 #include "Welcome.h"
 
-bool WelcomeView::activate(CDKSCREEN *screen)
+WelcomeView::WelcomeView(CDKSCREEN *screen) : BaseView(screen) {}
+
+bool WelcomeView::activate()
 {
     curs_set(0);
 

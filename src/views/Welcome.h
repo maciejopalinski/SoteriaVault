@@ -3,10 +3,12 @@
 
 #include "BaseView.h"
 
-class WelcomeView
+class WelcomeView : BaseView
 {
     public:
-        bool activate(CDKSCREEN *screen);
+        WelcomeView(CDKSCREEN *screen);
+        
+        bool activate();
 };
 
 #endif
