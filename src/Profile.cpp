@@ -10,11 +10,15 @@ bool Profile::loadFromFile()
     
     if((file = fopen(filename.c_str(), "rb")))
     {
-        char* header[16];
+        // checking headers
+        char header[16];
         fread(header, 1, 16, file);
-        if(memcmp(header, "Soteria-Vault  ", 16)) return false;
+        if(memcmp(header, HEADER_PROJECT_NAME, sizeof HEADER_PROJECT_NAME - 1)) return false;
         
-        fseek(file, 16*3, SEEK_SET);
+        fread(header, 1, 16, file);
+        if(memcmp(header, HEADER_FORMAT, sizeof HEADER_FORMAT - 1)) return false;
+        
+        fseek(file, 16*2, SEEK_SET);
 
         fread(encrypted_key1, 1, sizeof(encrypted_key1), file);
         fread(iv, 1, sizeof(iv), file);
@@ -45,9 +49,14 @@ bool Profile::saveToFile()
 
     if((file = fopen(filename.c_str(), "wb")))
     {
-        fwrite("Soteria-Vault  ", 1, 16, file);
-        fwrite("Version 1.0.0  ", 1, 16, file);
-        fwrite("Dont edit this!", 1, 16, file);
+        // headers padding just for good looking hexdump
+        string prname = HEADER_PROJECT_NAME, format = HEADER_FORMAT;
+        prname.append(15 - prname.size(), ' ');
+        format.append(15 - format.size(), ' ');
+
+        // writing data to file
+        fwrite(prname.c_str(), 1, 16, file);
+        fwrite(format.c_str(), 1, 16, file);
 
         fwrite(encrypted_key1, 1, sizeof(encrypted_key1), file);
         fwrite(iv, 1, sizeof(iv), file);
@@ -74,21 +83,24 @@ bool Profile::authenticate(string password)
     return authenticated;
 }
 
-void Profile::setData(string data)
+void Profile::setData(char const* data, size_t size)
 {
-    size_t required_padding = (AES_BLOCK_SIZE - (data.size() % AES_BLOCK_SIZE));
-    vector<uint8_t> padded_data(data.begin(), data.end());
+    size_t required_padding = (AES_BLOCK_SIZE - (size % AES_BLOCK_SIZE));
+    vector<uint8_t> padded_data(data, data + size);
 
     for (size_t i = 0; i < required_padding; i++) padded_data.push_back(0);
 
     data_size = padded_data.size();
 
-    free(this->data);
-    free(this->encrypted_data);
     this->data = (uint8_t*) malloc(data_size + 1);
     this->encrypted_data = (uint8_t*) malloc(data_size + 1);
 
     memcpy(this->data, &padded_data[0], data_size);
+}
+
+void Profile::setData(string data)
+{
+    setData(data.c_str(), data.size());
 }
 
 uint8_t* Profile::getData() { return data; }

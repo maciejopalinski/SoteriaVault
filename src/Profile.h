@@ -9,6 +9,7 @@
 #include <openssl/rand.h>
 using namespace std;
 
+#include "Version.h"
 #include "PBKDF2.h"
 #include "Utils.h"
 
@@ -46,6 +47,7 @@ class Profile
 
         bool authenticate(string password);
 
+        void setData(char const* data, size_t size);
         void setData(string data);
         uint8_t* getData();
         size_t getDataSize();
