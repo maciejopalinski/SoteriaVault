@@ -1,4 +1,4 @@
-#include "Login.h"
+#include "Create.h"
 
 static int entryCB(EObjectType cdktype, void *object, void *clientData, chtype key)
 {
@@ -7,42 +7,10 @@ static int entryCB(EObjectType cdktype, void *object, void *clientData, chtype k
     return true;
 }
 
-LoginView::LoginView(CDKSCREEN *screen) : BaseView(screen) {}
+CreateView::CreateView(CDKSCREEN *screen) : BaseView(screen) {}
 
-bool LoginView::prompt_filename()
+bool CreateView::prompt_filename()
 {
-    // const char *items[] = {
-    //     "Item 1",
-    //     "Item 2",
-    //     "Item 3",
-    //     "(+) Create New Profile"
-    // };
-
-    // CDKSCROLL *scroll_list = newCDKScroll(
-    //     screen,
-    //     LEFT, CENTER,
-    //     RIGHT,
-    //     0, COLS / 2,
-    //     "Choose profile",
-    //     (CDK_CSTRING2) items,
-    //     4,
-    //     true,
-    //     A_REVERSE,
-    //     true, false
-    // );
-
-    // int selection = activateCDKScroll(scroll_list, 0);
-    
-    // destroyCDKScroll(scroll_list);
-
-    // if(selection == 3)
-    // {
-    //     CreateView create = CreateView(screen);
-    //     if(!create.activate()) return false;
-    // }
-
-    // return false;
-
     CDKENTRY *profile_entry = newCDKEntry(
         screen,
         CENTER,
@@ -96,7 +64,7 @@ bool LoginView::prompt_filename()
     return button_box->currentButton == 0;
 }
 
-bool LoginView::prompt_password()
+bool CreateView::prompt_password()
 {
     CDKENTRY *password_entry = newCDKEntry(
         screen,
@@ -151,34 +119,45 @@ bool LoginView::prompt_password()
     return button_box->currentButton == 0;
 }
 
-bool LoginView::activate()
+bool CreateView::data_check()
 {
-    filename:
+    const char* lines[4] = {
+        "You are about to create new profile",
+        strcat(copyChar("Filename: ./profiles/"), filename),
+        "If file already exists, it will be overwritten!",
+        "To continue, press ANY key. To abort, press ESC."
+    };
+
+    CDKLABEL* info = newCDKLabel(
+        screen,
+        CENTER, CENTER,
+        (char**) lines, 4,
+        false, false
+    );
+
+    drawCDKLabel(info, 0);
+
+    int input = getch();
+    destroyCDKLabel(info);
+
+    if(input == KEY_F(1) || input == KEY_ESC) return false;
+    else return true;
+}
+
+bool CreateView::activate()
+{
     if(!prompt_filename()) return false;
 
     password:
-    if(!prompt_password()) goto filename;
+    if(!prompt_password()) goto password;
 
-    if(!login()) goto password;
+    if(!data_check()) return false;
+
+    profile.setData(">===> default <===<");
+    profile.encryptData();
+
+    profile.setFilename(strcat(copyChar("profiles/"), filename));
+    profile.saveToFile();
 
     return true;
-}
-
-bool LoginView::login()
-{
-    profile = Profile();
-
-    string filename(this->filename);
-    string password(this->password);
-
-    profile.setFilename(filename);
-    if(!profile.loadFromFile()) return false;
-
-    if (profile.authenticate(password))
-    {
-        profile.decryptData();
-        return true;
-    }
-
-    return false;
 }

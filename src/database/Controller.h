@@ -1,7 +1,7 @@
 #ifndef DB_CONTROLLER_H
 #define DB_CONTROLLER_H
 
-#include <sqlite3.h>
+#include "../include/sqlite3/sqlite3.h"
 #include <vector>
 #include <map>
 using namespace std;
