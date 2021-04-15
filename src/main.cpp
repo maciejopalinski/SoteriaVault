@@ -1,17 +1,97 @@
 // Copyright (C) 2021  Maciej Opaliński. All Rights Reserved.
 
 #include <iostream>
-#include <sstream>
-#include <cdk.h>
+#include <gtkmm.h>
 using namespace std;
 
 #include "include/sqlite3/sqlite3.h"
-#include "Profile.h"
-#include "views/Welcome.h"
-#include "views/Login.h"
-#include "views/Profile.h"
 #include "database/Controller.h"
+#include "Profile.h"
+
 #include "Version.h"
+
+Glib::RefPtr<Gtk::Application> app;
+
+Gtk::Window *ProfileSelect;
+Gtk::Window *ProfileView;
+
+Gtk::FileChooserButton *LoginFile;
+Gtk::Entry             *LoginPassword;
+Gtk::Button            *LoginSubmit;
+Gtk::SearchEntry       *ProfileViewSearch;
+Gtk::TextView          *ProfileViewText;
+Gtk::Button            *ProfileViewCreateNew;
+
+DatabaseController db;
+Profile profile;
+
+void on_app_activate()
+{
+    auto builder = Gtk::Builder::create_from_file("../SoteriaVault.glade");
+
+    builder->get_widget("ProfileSelect", ProfileSelect);
+    builder->get_widget("ProfileView", ProfileView);
+
+    builder->get_widget("LoginFile", LoginFile);
+    builder->get_widget("LoginPassword", LoginPassword);
+    builder->get_widget("LoginSubmit", LoginSubmit);
+    builder->get_widget("ProfileViewSearch", ProfileViewSearch);
+    builder->get_widget("ProfileViewText", ProfileViewText);
+    builder->get_widget("ProfileViewCreateNew", ProfileViewCreateNew);
+
+    LoginSubmit->signal_clicked().connect([] () {
+                
+        profile.setFilename(LoginFile->get_filename());
+        profile.loadFromFile();
+
+        if(profile.authenticate(LoginPassword->get_text()))
+        {
+            profile.decryptData();
+            db.getFromProfile(profile);
+
+            ProfileSelect->hide();
+            
+            app->add_window(*ProfileView);
+            ProfileView->show();
+
+            string text = "";
+            text += "File: " + LoginFile->get_filename() + "\n";
+            text += "Password: " + LoginPassword->get_text() + "\n";
+
+            ProfileViewText->get_buffer()->set_text(text);
+        }
+        else
+        {
+            app->quit();
+        }
+    });
+
+    ProfileViewCreateNew->signal_clicked().connect([] () {
+        if(!profile.isAuthenticated()) return;
+        
+        string query = ProfileViewSearch->get_text();
+        string output = "";
+        auto res = db.query(query);
+
+        int index = 1;
+        for (auto row : res)
+        {
+            output += to_string(index) + "\n";
+            for (auto col : row)
+            {
+                output += col.first + ": " + col.second + "\n";
+            }
+            output += "\n";
+            index++;
+        }
+
+        ProfileViewText->get_buffer()->set_text(output);
+    });
+
+    app->add_window(*ProfileSelect);
+
+    ProfileSelect->show();
+}
 
 void setup()
 {
@@ -57,94 +137,14 @@ void setup()
     profile.saveToFile();
 }
 
-void load()
-{
-    // initialize the profile instance
-    Profile profile = Profile();
-
-    string filename;
-    printf("Enter filename: ");
-    cin >> filename;
-
-    string password;
-    printf("Enter password: ");
-    cin >> password;
-
-    // load its contents from file
-    profile.setFilename(filename);
-    profile.loadFromFile();
-
-    // try to authenticate using provided password
-    if (profile.authenticate(password))
-    {
-        printf("PASSWORD CORRECT\n");
-
-        profile.decryptData();
-        // printf("\n%s\n", bin_hex(profile.getData(), profile.getDataSize()).c_str());
-        // printf("\n%s\n", profile.getData());
-        // profile.debug();
-
-        // initialize sqlite database and load its serialized contents
-        DatabaseController db = DatabaseController();
-        db.getFromProfile(profile);
-
-        // example query
-        auto res = db.query("SELECT * FROM users LIMIT 10;");
-
-        int row_i = 1;
-        for (auto row : res)
-        {
-            printf("\n%i:\n", row_i);
-            for (auto col : row)
-            {
-                printf("%s: %s\n", col.first.c_str(), col.second.c_str());
-            }
-            row_i++;
-        }
-    }
-    else
-    {
-        printf("PASSWORD INCORRECT!!!\n");
-    }
-}
-
-int cdk_exit(CDKSCREEN* screen)
-{
-    destroyCDKScreen(screen);
-    endCDK();
-    return 0;
-}
-
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     // setup();
-    load();
-    return 0;
-    
-    initscr();
-    raw();
-    keypad(stdscr, true);
-    noecho();
-    cbreak();
-    
-    CDKSCREEN* screen = initCDKScreen(stdscr);
-    refresh();
+    // return 0;
 
-    WelcomeView welcome = WelcomeView(screen);
-    if(!welcome.activate()) return cdk_exit(screen);
+    app = Gtk::Application::create("io.github.poprostumieciek.SoteriaVault");
 
-    LoginView login = LoginView(screen);
-    if(!login.activate()) return cdk_exit(screen);
-    
-    ProfileView prof_view = ProfileView(screen, login.profile);
-    if(!prof_view.activate()) return cdk_exit(screen);
+    app->signal_activate().connect([] () { on_app_activate(); });
 
-    prof_view.profile.encryptData();
-    prof_view.profile.saveToFile();
-    
-    cdk_exit(screen);
-    
-    printf("\ndata_size: %i\n", (int) login.profile.getDataSize());
-    
-    return 0;
+    return app->run(argc, argv);
 }
