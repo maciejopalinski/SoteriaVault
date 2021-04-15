@@ -2,8 +2,8 @@ TARGET := ./bin/soteria-vault.o
 CC := gcc
 CFLAGS := -DSQLITE_ENABLE_DESERIALIZE
 CXX := g++
-CXXFLAGS := -std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-unused-result -g
-LDFLAGS := -lncurses -lcdk -lcrypto -lpthread -ldl
+CXXFLAGS := -std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-unused-result -g `pkg-config gtkmm-3.0 --cflags`
+LDFLAGS := -lcrypto -ldl `pkg-config gtkmm-3.0 --libs`
 
 SRC_DIR := ./src
 BIN_DIR := ./bin
@@ -14,7 +14,7 @@ C_OBJ_FILES := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(C_SRC_FILES))
 CPP_SRC_FILES := $(shell find $(SRC_DIR) -type f -name '*.cpp')
 CPP_OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(CPP_SRC_FILES))
 
-$(TARGET): $(CPP_OBJ_FILES) $(C_OBJ_FILES)
+$(TARGET): $(C_OBJ_FILES) $(CPP_OBJ_FILES)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
