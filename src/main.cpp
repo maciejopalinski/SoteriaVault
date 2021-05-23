@@ -27,7 +27,7 @@ Profile profile;
 
 void on_app_activate()
 {
-    auto builder = Gtk::Builder::create_from_file("../SoteriaVault.glade");
+    auto builder = Gtk::Builder::create_from_file("SoteriaVault.glade");
 
     builder->get_widget("ProfileSelect", ProfileSelect);
     builder->get_widget("ProfileView", ProfileView);
